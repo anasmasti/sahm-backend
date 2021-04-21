@@ -18,7 +18,7 @@ const io = require('socket.io')(server, {
     }
 })
 const url = require('./config/db.config.js')
-const port = process.env.PORT || 5050
+const port = process.env.PORT || 5000
 
 //use body parser
 app.use(bodyParser.urlencoded({ extended: true }))
