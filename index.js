@@ -6,25 +6,35 @@ const BenefitedRouter = require('./routes/benifited.js')
 const HomeRouter = require('./routes/home.js')
 const GiverRouter = require('./routes/giver.js')
 const mongoose = require('mongoose')
+const http = require('http');
+
 
 const app = express()
+const server = http.createServer(app)
+const io = require('socket.io')(server, {
+    cors: {
+        origin: "http://localhost:4200",
+        methods: ["GET", "POST"]
+    }
+})
 const url = require('./config/db.config.js')
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 5050
 
-//Use body parser
+//use body parser
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-//Use Cors
+//use Cors
 app.use(cors({
     origin: '*',
+    credentials: true,
     methods: [
         'GET', 'POST', 'PUT', 'DELETE'
     ],
     allowedHeaders: 'Content-Type, X-Requested-With, Accept, Origin, Authorization'
 }))
 
-//Connection with database
+//Ccnnection with database
 mongoose.connect(url, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -35,14 +45,28 @@ mongoose.connect(url, {
     process.exit();
 });
 
-//Home router
+//check if new user on my app on rel time
+io.on('connection', (socket) => {
+    console.log('a new user connected');
+    //listen on chat event
+    socket.on('chat', (data) => {
+        console.log('user send msg: ', data);
+        //send the message to client
+        io.emit('get_message', data)
+    });
+    socket.on('typing', () => {
+        console.log('typing..');
+    });
+});
+
+//nome router
 app.use('/', HomeRouter);
-//Admin router
+//admin router
 app.use('/api/admin', AdminRouter);
-//Benefited router
+//benefited router
 app.use('/api/benefited', BenefitedRouter);
-//Giver router
+//giver router
 app.use('/api/giver', GiverRouter);
 
-
-app.listen(port, console.log("app run on port: " + port))
+//run the server
+server.listen(port, console.log("app is listening on http://localhost:" + port))
