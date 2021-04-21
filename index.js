@@ -24,18 +24,6 @@ const io = require('socket.io')(server, {
 const url = require('./config/db.config.js')
 const port = process.env.PORT || 5000
 
-app.use((req, res, next) => {
-    const allowedOrigins = ['http://localhost:4200', 'https://sahm-frontend-git-dev-anasmasti.vercel.app/'];
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-    res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Credentials', true);
-    return next();
-});
-
 //use body parser
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
