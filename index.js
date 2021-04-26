@@ -13,7 +13,7 @@ const app = express()
 const server = http.createServer(app)
 const io = require('socket.io')(server, {
     cors: {
-        origin: '*',
+        origin: 'https://sahmnow.vercel.app',
         credentials: true,
         methods: [
             'GET', 'POST', 'PUT', 'DELETE'
