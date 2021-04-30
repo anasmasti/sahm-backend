@@ -8,7 +8,6 @@ const GiverRouter = require('./routes/giver.js')
 const mongoose = require('mongoose')
 const http = require('http');
 const socketIO = require('socket.io');
-const socketRedis = require('socket.io-redis')
 
 
 const app = express()
@@ -23,9 +22,6 @@ const io = socketIO(server, {
 })
 const DB_URL = require('./config/db.config.js')
 const PORT = process.env.PORT || 5000
-const REDIS_HOST = 'localhost'
-const REDIS_PORT = 6379
-const redisAdapter = socketRedis({ host: REDIS_HOST, port: REDIS_PORT })
 
 //use body parser
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -53,19 +49,18 @@ mongoose.connect(DB_URL, {
 });
 
 //check if new user on my app on rel time
-io.adapter(redisAdapter)
-    .on('connection', (socket) => {
-        console.log('a new user connected');
-        //listen on chat event
-        socket.on('chat', (data) => {
-            console.log('user send msg: ', data);
-            //send the message to client
-            io.emit('get_message', data)
-        });
-        socket.on('typing', () => {
-            console.log('typing..');
-        });
+io.on('connection', (socket) => {
+    console.log('a new user connected');
+    //listen on chat event
+    socket.on('chat', (data) => {
+        console.log('user send msg: ', data);
+        //send the message to client
+        io.emit('get_message', data)
     });
+    socket.on('typing', () => {
+        console.log('typing..');
+    });
+});
 
 //nome router
 app.use('/', HomeRouter);
