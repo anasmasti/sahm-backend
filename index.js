@@ -62,6 +62,11 @@ io.on('connection', (socket) => {
     });
 });
 
+io.configure(function() {
+    io.set("transports", a["xhr-polling"]);
+    io.set("polling duration", 10);
+});
+
 //nome router
 app.use('/', HomeRouter);
 //admin router
