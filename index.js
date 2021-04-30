@@ -7,11 +7,13 @@ const HomeRouter = require('./routes/home.js')
 const GiverRouter = require('./routes/giver.js')
 const mongoose = require('mongoose')
 const http = require('http');
+const socketIO = require('socket.io');
+const socketRedis = require('socket.io-redis')
 
 
 const app = express()
 const server = http.createServer(app)
-const io = require('socket.io')(server, {
+const io = socketIO(server, {
     cors: {
         // origin: 'https://sahmnow.vercel.app',
         origin: 'http://localhost:4200',
@@ -19,8 +21,11 @@ const io = require('socket.io')(server, {
         methods: ["GET", "POST"],
     }
 })
-const url = require('./config/db.config.js')
-const port = process.env.PORT || 5000
+const DB_URL = require('./config/db.config.js')
+const PORT = process.env.PORT || 5000
+const REDIS_HOST = 'localhost'
+const REDIS_PORT = 6379
+const redisAdapter = socketRedis({ host: REDIS_HOST, port: REDIS_PORT })
 
 //use body parser
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -37,7 +42,7 @@ app.use(cors({
 }))
 
 //Ccnnection with database
-mongoose.connect(url, {
+mongoose.connect(DB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
@@ -48,18 +53,19 @@ mongoose.connect(url, {
 });
 
 //check if new user on my app on rel time
-io.on('connection', (socket) => {
-    console.log('a new user connected');
-    //listen on chat event
-    socket.on('chat', (data) => {
-        console.log('user send msg: ', data);
-        //send the message to client
-        io.emit('get_message', data)
+io.adapter(redisAdapter)
+    .on('connection', (socket) => {
+        console.log('a new user connected');
+        //listen on chat event
+        socket.on('chat', (data) => {
+            console.log('user send msg: ', data);
+            //send the message to client
+            io.emit('get_message', data)
+        });
+        socket.on('typing', () => {
+            console.log('typing..');
+        });
     });
-    socket.on('typing', () => {
-        console.log('typing..');
-    });
-});
 
 //nome router
 app.use('/', HomeRouter);
@@ -71,4 +77,4 @@ app.use('/api/benefited', BenefitedRouter);
 app.use('/api/giver', GiverRouter);
 
 //run the server
-server.listen(port, console.log("app is listening on http://localhost:" + port))
+server.listen(PORT, console.log("app is listening on http://localhost:" + PORT))
