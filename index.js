@@ -20,8 +20,9 @@ const io = socketIO(server, {
         methods: ["GET", "POST"],
     }
 })
+require('dotenv').config()
 const DB_URL = require('./config/db.config.js')
-const PORT = 8080
+const PORT = process.env.PORT;
 
 //use body parser
 app.use(bodyParser.urlencoded({ extended: true }))
