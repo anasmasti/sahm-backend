@@ -21,7 +21,7 @@ const io = socketIO(server, {
     }
 })
 const DB_URL = require('./config/db.config.js')
-const PORT = process.env.PORT || 5000
+const PORT = 8080
 
 //use body parser
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -60,11 +60,6 @@ io.on('connection', (socket) => {
     socket.on('typing', () => {
         console.log('typing..');
     });
-});
-
-io.configure(function() {
-    io.set("transports", a["xhr-polling"]);
-    io.set("polling duration", 10);
 });
 
 //nome router
