@@ -1,32 +1,39 @@
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
-const AdminRouter = require('./routes/admin.js')
-const BenefitedRouter = require('./routes/benifited.js')
+const UserRouter = require('./routes/user/userCrud.js')
 const HomeRouter = require('./routes/home.js')
-const GiverRouter = require('./routes/giver.js')
+const ActionRouter = require('./routes/action.js')
+const ContactRouter = require('./routes/contact.js')
 const mongoose = require('mongoose')
-const http = require('http');
-
+const http = require('http')
+const helmet = require('helmet')
+const dotenv = require('dotenv')
 
 const app = express()
 const server = http.createServer(app)
-const io = require('socket.io')(server, {
-    cors: {
-        origin: "http://localhost:4200",
-        methods: ["GET", "POST"]
-    }
-})
-const url = require('./config/db.config.js')
-const port = process.env.PORT || 5050
+// const io = require('socket.io')(server, {
+//     cors: {
+//         origin: "http://localhost:4200",
+//         methods: ["GET", "POST"]
+//     }
+// })
+
+// Config variables
+const DB_URL = process.env.DB_URL || require('./config/db.config.js')
+const PORT = process.env.PORT || 5050;
+const HOST = process.env.HOST || '192.168.11.100'
+
+// Dotenv config
+dotenv.config()
 
 //use body parser
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-//use Cors
+// Cors config
 app.use(cors({
-    origin: '*',
+    origin: '',
     credentials: true,
     methods: [
         'GET', 'POST', 'PUT', 'DELETE'
@@ -34,8 +41,8 @@ app.use(cors({
     allowedHeaders: 'Content-Type, X-Requested-With, Accept, Origin, Authorization'
 }))
 
-//Ccnnection with database
-mongoose.connect(url, {
+//Connection with database
+mongoose.connect(DB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
@@ -46,27 +53,27 @@ mongoose.connect(url, {
 });
 
 //check if new user on my app on rel time
-io.on('connection', (socket) => {
-    console.log('a new user connected');
-    //listen on chat event
-    socket.on('chat', (data) => {
-        console.log('user send msg: ', data);
-        //send the message to client
-        io.emit('get_message', data)
-    });
-    socket.on('typing', () => {
-        console.log('typing..');
-    });
-});
+// io.on('connection', (socket) => {
+//     console.log('a new user connected');
+//     //listen on chat event
+//     socket.on('chat', (data) => {
+//         console.log('user send msg: ', data);
+//         //send the message to client
+//         io.emit('get_message', data)
+//     });
+//     socket.on('typing', () => {
+//         console.log('typing..');
+//     });
+// })
 
-//nome router
-app.use('/', HomeRouter);
-//admin router
-app.use('/api/admin', AdminRouter);
-//benefited router
-app.use('/api/benefited', BenefitedRouter);
-//giver router
-app.use('/api/giver', GiverRouter);
+//Helmet security
+app.use(helmet());
+
+// Main route
+app.use('/', HomeRouter); //home router
+app.use('/api/user', UserRouter); //User router
+app.use('/api/action', ActionRouter); //action router
+app.use('/api/contact', ContactRouter); //Contact router
 
 //run the server
-server.listen(port, console.log("app is listening on http://localhost:" + port))
+server.listen(port, host, console.log(`app is listening on: http://${HOST}:${PORT}`))
