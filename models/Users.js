@@ -30,7 +30,14 @@ const UserSchema = new Schema({
         type: String,
         // required: true
     },
+    username: {
+        type: String,
+    },
     email: {
+        type: String,
+        // required: true
+    },
+    password: {
         type: String,
         // required: true
     },
@@ -42,7 +49,7 @@ const UserSchema = new Schema({
         type: String,
         // required: true
     },
-    address: {
+    adress: {
         type: String,
         // required: true
     },
@@ -51,12 +58,7 @@ const UserSchema = new Schema({
         default: false,
         // required: true
     },
-    action: {
-        type: Schema.Types.ObjectId,
-        ref: 'Action',
-        // required: true
-        default: null
-    }
+ 
 
 }, {
     timestamps: true

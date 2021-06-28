@@ -1,79 +1,47 @@
-const express = require('express')
-const cors = require('cors')
-const bodyParser = require('body-parser')
-const UserRouter = require('./routes/user/userCrud.js')
-const HomeRouter = require('./routes/home.js')
-const ActionRouter = require('./routes/action.js')
-const ContactRouter = require('./routes/contact.js')
-const mongoose = require('mongoose')
-const http = require('http')
+const express = require('express');
+const app = express();
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const jwt =require("jsonwebtoken");
 const helmet = require('helmet')
 const dotenv = require('dotenv')
+const SecrectKeyVerify = require('./Middleware/api_key.verification')
 
-const app = express()
-const server = http.createServer(app)
-// const io = require('socket.io')(server, {
-//     cors: {
-//         origin: "http://localhost:4200",
-//         methods: ["GET", "POST"]
-//     }
-// })
+dotenv.config();
 
-// Config variables
-const DB_URL = process.env.DB_URL || require('./config/db.config.js')
-const PORT = process.env.PORT || 5050;
-const HOST = process.env.HOST || '192.168.11.100'
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.json());
+app.use(helmet())
 
-// Dotenv config
-dotenv.config()
+//import routes 
+const giverRoute = require('./routes/giver');
+app.use('/giver', SecrectKeyVerify, giverRoute);
 
-//use body parser
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
 
-// Cors config
-app.use(cors({
-    origin: '',
-    credentials: true,
-    methods: [
-        'GET', 'POST', 'PUT', 'DELETE'
-    ],
-    allowedHeaders: 'Content-Type, X-Requested-With, Accept, Origin, Authorization'
-}))
 
-//Connection with database
-mongoose.connect(DB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
-    console.log("Successfully connected to MongoDB");
-}).catch(err => {
-    console.log('Could not connect. Exiting now...', err);
-    process.exit();
+const actionRoute = require('./routes/action/actions');
+app.use('/actions',actionRoute);
+
+
+
+const login = require('./routes/login');
+app.use('/login',login);
+const users = require('./routes/Users/users');
+app.use('/users/users',users);
+
+//  ROUTE
+app.get('/',(req,res)=>{
+    res.send('welcome home');
 });
 
-//check if new user on my app on rel time
-// io.on('connection', (socket) => {
-//     console.log('a new user connected');
-//     //listen on chat event
-//     socket.on('chat', (data) => {
-//         console.log('user send msg: ', data);
-//         //send the message to client
-//         io.emit('get_message', data)
-//     });
-//     socket.on('typing', () => {
-//         console.log('typing..');
-//     });
-// })
 
-//Helmet security
-app.use(helmet());
 
-// Main route
-app.use('/', HomeRouter); //home router
-app.use('/api/user', UserRouter); //User router
-app.use('/api/action', ActionRouter); //action router
-app.use('/api/contact', ContactRouter); //Contact router
+// Connect to DB 
+mongoose.connect(process.env.DB_CONNECTION,{useNewUrlParser:true} , ()=> console.log('connected to db'))
 
-//run the server
-server.listen(port, host, console.log(`app is listening on: http://${HOST}:${PORT}`))
+
+//listen to server 
+app.listen(3000,'192.168.11.134');
+// app.listen(3001);

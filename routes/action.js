@@ -18,6 +18,9 @@ router.post('/', async(req, res) => {
             type_abonnement: req.body.type_abonnement,
         },
         autre: req.body.autre,
+        statut: req.body.statut,
+        details: req.body.details,
+        etat: req.body.etat,
     });
     await action
         .save()
@@ -76,6 +79,9 @@ router.put('/:Id', async(req, res) => {
             type_abonnement: req.body.type_abonnement,
         },
         autre: req.body.autre,
+        statut: req.body.statut,
+        details: req.body.details,
+        etat: req.body.etat,
     }).then((data) => {
         res.send('');
     });
